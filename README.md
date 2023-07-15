@@ -20,6 +20,10 @@ the seconds and directory setting in the top right shown in the screen shot is h
 key bindings:
 
 ->:             Next (random) image
+
 <-:             Previous image
+
 Space or P:     pause
+
 S:              save to the "save" directory
+
