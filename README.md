@@ -9,8 +9,9 @@ install uvicorn and fastapi with pip
 make a directory in the same location called "save"
 change the default directory in the server.py file
 then start the server with start_server.py
+open http://localhost:8123/ in your browser.
 
-the seconds and directory setting shown in the screen shot is hidden until you hover over it.
+the seconds and directory setting in the top right shown in the screen shot is hidden until you hover over it.
 
 key bindings:
 
