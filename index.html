@@ -1,0 +1,189 @@
+ <!DOCTYPE html>
+<html>
+
+<body>
+
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        color: white;
+        background-color: #111111;
+        font-family: monospace;
+    }
+    div {
+        margin: 0;
+        padding: 0;
+    }
+    input {
+        border: none;
+        outline: none;
+        background-color: #111111;
+        color: inherit;
+        border-bottom: solid 2px #FFFFFFAA;
+        font-size: inherit;
+        font-family: inherit;
+    }
+    button {
+        font-size: inherit;
+        font-family: inherit;
+        box-sizing: border-box;
+        background-color: #0099ffAA;
+        border: none;
+        border-radius: 10%;
+        color: inherit;
+
+    }
+    button:hover { border-bottom: solid 2px #FFFFFFAA; }
+
+    #imgcon {
+        display: flex;
+        justify-content: center;
+        height: 100vh;
+
+        box-sizing: border-box;
+        /*border: solid 5px #AA1111;*/
+    }
+    #img {
+        width: 100%;
+        object-fit: contain;
+    }
+    #directory_input {
+        width: 100%;
+    }
+    #topcon {
+        opacity: 0;
+        background-color: inherit;
+        position: absolute;
+        margin: 1rem;
+        padding: 1rem;
+        top: 0;
+        right: 0;
+        border-radius: 1rem;
+    }
+    #topcon:hover { opacity: .8 }
+    #topconin {
+        font-size: 1.3rem;
+    }
+    #secs { 
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin: 2rem;
+        padding: 1rem;
+        font-size: 7rem;
+        border-radius: 1rem;
+        background-color: #000000AA;   
+    }
+    
+</style>
+
+
+<div id='secs'>9999</div>
+<div id=topcon>
+
+    <div id=topconin>
+        SEC: 
+        <input id="secinput" placeholder="60 seconds" >
+        <button id=dirbtn onclick='change_length()'>click</button>
+        <br><br>
+        DIR: 
+        <input id="dirinput" placeholder="D:\ART\REFERENCE 2D (and doujin)\ART PARENTS" >
+        <button id=dirbtn onclick="change_dir()">click</button>
+
+        <br><br><button id=dirbtn>save</button>
+    </div>
+</div>
+<div id='imgcon'>
+    <img id='img' src='http://localhost:8123/image/x' />
+</div>
+
+<script>
+    var LENGTH = 3 * 1000
+    var CDOWN_TIMER = LENGTH;
+    var PAUSED = false;
+
+    function img_gen_key() { return "http://localhost:8123/image/x#" + new Date().getTime() }
+    function prev_gen_key() { return "http://localhost:8123/image/xprev#" + new Date().getTime() }
+
+
+    function load_new_img() {
+        CDOWN_TIMER = LENGTH;
+        load_image(img_gen_key());
+    }
+    function load_prev_img() {
+        CDOWN_TIMER = LENGTH;
+        load_image(prev_gen_key());
+    }
+
+    function update_secs(val) { // expects ms and converts to seconds
+        var secs = document.getElementById('secs');
+        var ms = secs.value;
+        secs.innerHTML = parseInt(Math.ceil(val / 1000));
+        //secs.innerHTML = (val / 1000);
+    }
+
+    function load_image(src) {
+        var img = document.getElementById('img');
+        img.src = src;
+    }
+
+    function update() {
+        console.log('updatege');
+        // update timer 
+
+        if (!PAUSED) { 
+            CDOWN_TIMER -= 100;
+            // reset timer if needed
+            if (CDOWN_TIMER <= 0) {
+                load_new_img();
+            }
+            update_secs(CDOWN_TIMER);
+        }
+    }
+
+    function change_dir() {
+        var dir = document.getElementById('dirinput').value;
+        dir = encodeURIComponent(dir);
+        fetch('http://localhost:8123/dir/' + dir)
+           .then(response => response.text() )
+           .then(text => { CDOWN_TIMER = 0; update(); } )
+    }
+
+    function change_length() {
+        var sec = document.getElementById('secinput').value;
+        LENGTH = parseInt(sec) * 1000;
+        CDOWN_TIMER = LENGTH;
+        update_secs(CDOWN_TIMER)
+    }
+
+    function KeyPress(e) {
+        var evtobj = window.event? event : e
+        console.log(evtobj.keyCode);
+        if (evtobj.keyCode == 37) { // left
+            load_prev_img();
+        }
+        if (evtobj.keyCode == 39) { // right
+            load_new_img();
+        }
+        if (evtobj.keyCode == 83) { // right
+            fetch('http://localhost:8123/save')
+               .then(response => response.text() )
+               .then(text => {  } )
+        }
+
+        if (evtobj.keyCode == 32 || evtobj.keyCode == 80) { // right
+            PAUSED = ! PAUSED;
+            if (PAUSED) { document.getElementById('secs').innerHTML = 'PAUSED' }
+        }
+    }
+    document.onkeydown = KeyPress;
+
+
+    var delta = 100;
+    var t = setInterval(update, delta);
+
+</script>
+
+</body>
+</html> 
