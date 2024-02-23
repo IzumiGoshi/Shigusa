@@ -94,59 +94,56 @@
     </div>
 </div>
 <div id='imgcon'>
-    <img id='img' src='http://localhost:8123/image/x' />
+    <img id='img' src='http://localhost:8123/randimg/823402380' />
 </div>
 
 <script>
-    var LENGTH = 62 * 1000
+    var LENGTH = 60 * 1000
     var CDOWN_TIMER = LENGTH;
     var PAUSED = false;
 
-    function img_gen_key() { return "http://localhost:8123/image/x#" + new Date().getTime() }
-    function prev_gen_key() { return "http://localhost:8123/image/xprev#" + new Date().getTime() }
-
-
-    function load_new_img() {
-        CDOWN_TIMER = LENGTH;
-        load_image(img_gen_key());
+    function get_dtime() {
+        return new Date().getTime();
     }
-    function load_prev_img() {
-        CDOWN_TIMER = LENGTH;
-        load_image(prev_gen_key());
+
+    function change_dir() {
+        var dir = document.getElementById('dirinput').value;
+        //enc_dir = encodeURIComponent(dir);
+        enc_dir = dir.replaceAll('/', '_|_|_|_')
+        console.log(enc_dir)
+        fetch('http://localhost:8123/setdir/' + enc_dir)
+           .then(response => response.text() )
+           .then(text => { CDOWN_TIMER = 0; update(); } )
     }
+
+    function KeyPress(e) {
+        var evtobj = window.event? event : e
+        console.log(evtobj.keyCode);
+        if (evtobj.keyCode == 37) { // left
+            var img = document.getElementById('img');
+            img.src = 'http://localhost:8123/previmg/' + get_dtime(); 
+        }
+        if (evtobj.keyCode == 39) { // right
+            var img = document.getElementById('img');
+            img.src = 'http://localhost:8123/randimg/' + get_dtime(); 
+        }
+        if (evtobj.keyCode == 83) { // save
+            fetch('http://localhost:8123/save')
+               .then(response => response.text() )
+               .then(text => {  } )
+        }
+
+        if (evtobj.keyCode == 32 || evtobj.keyCode == 80) {
+            PAUSED = ! PAUSED;
+            if (PAUSED) { document.getElementById('secs').innerHTML = 'PAUSED' }
+        }
+    }
+    document.onkeydown = KeyPress;
 
     function update_secs(val) { // expects ms and converts to seconds
         var secs = document.getElementById('secs');
         var ms = secs.value;
         secs.innerHTML = parseInt(Math.ceil(val / 1000));
-        //secs.innerHTML = (val / 1000);
-    }
-
-    function load_image(src) {
-        var img = document.getElementById('img');
-        img.src = src;
-    }
-
-    function update() {
-        console.log('updatege');
-        // update timer 
-
-        if (!PAUSED) { 
-            CDOWN_TIMER -= 100;
-            // reset timer if needed
-            if (CDOWN_TIMER <= 0) {
-                load_new_img();
-            }
-            update_secs(CDOWN_TIMER);
-        }
-    }
-
-    function change_dir() {
-        var dir = document.getElementById('dirinput').value;
-        dir = encodeURIComponent(dir);
-        fetch('http://localhost:8123/dir/' + dir)
-           .then(response => response.text() )
-           .then(text => { CDOWN_TIMER = 0; update(); } )
     }
 
     function change_length() {
@@ -156,28 +153,19 @@
         update_secs(CDOWN_TIMER)
     }
 
-    function KeyPress(e) {
-        var evtobj = window.event? event : e
-        console.log(evtobj.keyCode);
-        if (evtobj.keyCode == 37) { // left
-            load_prev_img();
-        }
-        if (evtobj.keyCode == 39) { // right
-            load_new_img();
-        }
-        if (evtobj.keyCode == 83) { // right
-            fetch('http://localhost:8123/save')
-               .then(response => response.text() )
-               .then(text => {  } )
-        }
-
-        if (evtobj.keyCode == 32 || evtobj.keyCode == 80) { // right
-            PAUSED = ! PAUSED;
-            if (PAUSED) { document.getElementById('secs').innerHTML = 'PAUSED' }
+    function update() {
+        // update timer 
+        if (!PAUSED) { 
+            CDOWN_TIMER -= 100;
+            // reset timer if needed
+            if (CDOWN_TIMER <= 0) {
+                var img = document.getElementById('img');
+                img.src = 'http://localhost:8123/randimg/' + get_dtime(); 
+                CDOWN_TIMER = LENGTH;
+            }
+            update_secs(CDOWN_TIMER);
         }
     }
-    document.onkeydown = KeyPress;
-
 
     var delta = 100;
     var t = setInterval(update, delta);
