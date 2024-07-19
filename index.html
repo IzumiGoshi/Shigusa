@@ -39,19 +39,24 @@
     #imgcon {
         display: flex;
         justify-content: center;
+        /*
         height: 100vh;
 
         box-sizing: border-box;
         /*border: solid 5px #AA1111;*/
     }
     #img {
+        /*
         width: 100%;
         object-fit: contain;
+        */
     }
     #directory_input {
         width: 100%;
     }
     #topcon {
+        font-weight: bold;
+        font-size: 2.2rem;
         opacity: 0;
         background-color: inherit;
         position: absolute;
@@ -63,9 +68,9 @@
     }
     #topcon:hover { opacity: .8 }
     #topconin {
-        font-size: 1.3rem;
     }
     #secs { 
+        zoom: 100%;
         position: absolute;
         top: 0;
         left: 0;
@@ -85,7 +90,7 @@
     <div id=topconin>
         SEC: 
         <input id="secinput" placeholder="60 seconds" >
-        <button id=dirbtn onclick='change_length()'>click</button>
+        <button id=dirbtn onclick='change_length_button()'>click</button>
         <br><br>
         DIR: 
         <input id="dirinput" placeholder="D:\ART\REFERENCE 2D (and doujin)\ART PARENTS" >
@@ -98,6 +103,7 @@
 </div>
 
 <script>
+
     var LENGTH = 60 * 1000
     var CDOWN_TIMER = LENGTH;
     var PAUSED = false;
@@ -121,11 +127,13 @@
         console.log(evtobj.keyCode);
         if (evtobj.keyCode == 37) { // left
             var img = document.getElementById('img');
-            img.src = 'http://localhost:8123/previmg/' + get_dtime(); 
+            img.src = 'http://localhost:8123/previmg/' + get_dtime();
+	    change_length(LENGTH);
         }
         if (evtobj.keyCode == 39) { // right
             var img = document.getElementById('img');
-            img.src = 'http://localhost:8123/randimg/' + get_dtime(); 
+            img.src = 'http://localhost:8123/randimg/' + get_dtime();
+	    change_length(LENGTH);
         }
         if (evtobj.keyCode == 83) { // save
             fetch('http://localhost:8123/save')
@@ -146,11 +154,16 @@
         secs.innerHTML = parseInt(Math.ceil(val / 1000));
     }
 
-    function change_length() {
-        var sec = document.getElementById('secinput').value;
-        LENGTH = parseInt(sec) * 1000;
+    function change_length(new_len) {
+        LENGTH = parseInt(new_len);
         CDOWN_TIMER = LENGTH;
         update_secs(CDOWN_TIMER)
+    }
+
+    function change_length_button() {
+	var sec = document.getElementById('secinput').value;
+	sec *= 1000;
+	change_length(sec);
     }
 
     function update() {
@@ -169,6 +182,16 @@
 
     var delta = 100;
     var t = setInterval(update, delta);
+
+
+    addEventListener("resize", (event) => {
+        var correction = 1.0 /  window.devicePixelRatio;
+        var secs = document.getElementById("secs");
+        var topcon = document.getElementById("topcon");
+        secs.style.zoom = correction;
+        topcon.style.zoom = correction;
+
+    });
 
 </script>
 
