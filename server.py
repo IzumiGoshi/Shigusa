@@ -11,12 +11,16 @@ import urllib
 app = FastAPI()
 
 def load_image_bytes(fpath):
+    if not os.path.exists(fpath): 
+        return None
     with open(fpath, 'rb') as f: img = f.read()
     return img
 
 
 def image_walker(walker_path):
     image_files = []
+    if not os.path.exists(walker_path): return ["INVALID PATH"]
+
     img_exts = ['jpg', 'jpeg', 'png']
     for root, dirs, files in os.walk(walker_path, topdown=False):
         for f in files:
